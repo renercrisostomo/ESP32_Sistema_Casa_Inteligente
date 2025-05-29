@@ -1,8 +1,10 @@
+#include <Arduino.h>
 #include <WiFi.h>
 #include <LittleFS.h>
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>
 #include <ArduinoJson.h>
+#include "distance_sensor.h"
 
 // Pinos do LED RGB
 const int redPin = 19;
@@ -11,6 +13,15 @@ const int bluePin = 21;
 
 // Pino do botão
 const int buttonPin = 23;
+
+// Variáveis globais para controle de tempo do log de distância
+unsigned long lastDistanceLogTime = 0;
+const unsigned long distanceLogInterval = 60000; // 1 minuto em milissegundos
+
+// Função para verificar se um intervalo de tempo passou
+bool intervalHasPassed(unsigned long startTime, unsigned long interval) {
+  return (millis() - startTime >= interval);
+}
 
 // Controle do estado do LED
 int ledState = 0;
@@ -32,6 +43,7 @@ UniversalTelegramBot bot(BOT_TOKEN, client);
 void saveLedState();
 void printLedStateFile();
 void loadWiFiCredentialsAndConnect();
+void handleNewMessages(int numNewMessages);
 
 void setup() {
   Serial.begin(115200);
@@ -55,7 +67,22 @@ void setup() {
 }
 
 void loop() {
-  
+  readDistanceAndControlLed();
+
+  if (intervalHasPassed(lastDistanceLogTime, distanceLogInterval)) {
+    lastDistanceLogTime = millis();
+    logCurrentDistance();
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
+    while (numNewMessages) {
+      handleNewMessages(numNewMessages);
+      numNewMessages = bot.getUpdates(bot.last_message_received + 1);
+    }
+  }
+
+  delay(1000);
 }
 
 // Conecta ao Wi-Fi com base no arquivo de credenciais
