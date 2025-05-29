@@ -3,20 +3,26 @@
 
 #include <Arduino.h>
 
-// Definições para o sensor HC-SR04 e LED de nível
-// ! Lembrar de conectar em 5V
-#define PINO_TRIG 5     // Pino D4 conectado ao TRIG do HC-SR04
-#define PINO_ECHO 27    // Pino D2 conectado ao ECHO do HC-SR04
-#define ledPin 26       // LED para indicar nível da água
+// Definições para o sensor HC-SR04
+#define PINO_TRIG 5
+#define PINO_ECHO 27
 
-const float DISTANCIA_MAX_CM = 50.0;  // Altura total do reservatório em cm (nível zero da água)
+// Pinos do LED RGB para indicar o nível da água
+const int redPin = 19;
+const int greenPin = 18;
+const int bluePin = 21;
+
+// Constante para o sensor de distância
+const float DISTANCIA_MAX_CM = 50.0;  // Altura total do reservatório em cm
 
 // Variáveis globais para leituras do sensor
 extern float currentDistancia;
 extern float currentNivelAgua;
 extern bool  sensorReadSuccessfully;
 
-void readDistanceAndControlLed();
+// Declarações de função
+void setupRgbLed(); // Nova função para configurar o LED RGB
+void readDistanceAndControlRgbLed(); // Renomeada
 void logCurrentDistance();
 
 #endif // DISTANCE_SENSOR_H

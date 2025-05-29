@@ -6,13 +6,10 @@
 #include <ArduinoJson.h>
 #include "distance_sensor.h"
 
-// Pinos do LED RGB
-const int redPin = 19;
-const int greenPin = 18;
-const int bluePin = 21;
-
 // Pino do botão
 const int buttonPin = 23;
+// Pino para o LED controlado pelo Telegram
+const int telegramLedPin = 4;
 
 // Variáveis globais para controle de tempo do log de distância
 unsigned long lastDistanceLogTime = 0;
@@ -47,10 +44,10 @@ void handleNewMessages(int numNewMessages);
 
 void setup() {
   Serial.begin(115200);
-  pinMode(redPin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
-  pinMode(bluePin, OUTPUT);
+  pinMode(telegramLedPin, OUTPUT); // Configura o pino do LED do Telegram como saída
   pinMode(buttonPin, INPUT_PULLUP);
+
+  setupRgbLed();
 
   Serial.println("Inicializando Sistema Casa Inteligente...");
 
@@ -67,7 +64,7 @@ void setup() {
 }
 
 void loop() {
-  readDistanceAndControlLed();
+  readDistanceAndControlRgbLed();
 
   if (intervalHasPassed(lastDistanceLogTime, distanceLogInterval)) {
     lastDistanceLogTime = millis();
@@ -166,12 +163,12 @@ void handleNewMessages(int numNewMessages) {
     }
 
     if (text == "/ledon") {
-      digitalWrite(redPin, HIGH);
+      digitalWrite(telegramLedPin, HIGH);
       bot.sendMessage(chat_id, "LED LIGADO! 💡", "");
     }
 
     if (text == "/ledoff") {
-      digitalWrite(redPin, LOW);
+      digitalWrite(telegramLedPin, LOW);
       bot.sendMessage(chat_id, "LED DESLIGADO! ❌", "");
     }
   }
