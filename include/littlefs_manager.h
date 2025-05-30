@@ -8,6 +8,6 @@ void setupLittleFS();
 void logDistanceMeasurement(float distancia, float nivelAgua);
 
 // userName é opcional pq pode ser vazio se não houver usuário associado
-void logAccessAttempt(const String& rfidTag, bool isAutorizado, const String& userName = "");
+void logAccessAttempt(const String& rfidTag, bool isAutorizado);
 
 #endif // LITTLEFS_MANAGER_H

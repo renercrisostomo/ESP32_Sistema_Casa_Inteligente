@@ -31,7 +31,7 @@ void logDistanceMeasurement(float distancia, float nivelAgua) {
   file.close();
 }
 
-void logAccessAttempt(const String& rfidTag, bool isAutorizado, const String& userName) {
+void logAccessAttempt(const String& rfidTag, bool isAutorizado) {
   File file = LittleFS.open(ACCESS_LOG_FILE, "a");
   if (!file) {
     Serial.print("Falha ao abrir ");
@@ -45,12 +45,26 @@ void logAccessAttempt(const String& rfidTag, bool isAutorizado, const String& us
     file.print("Acesso AUTORIZADO: Tag [");
     file.print(rfidTag);
     file.print("], Usuario [");
-    file.print(userName.isEmpty() ? "N/A" : userName);
     file.println("]");
   } else {
     file.print("Acesso NEGADO: Tag [");
     file.print(rfidTag);
     file.println("]");
+  }
+  file.close();
+}
+
+// Leitura conteúdo dos arquivos
+void listarUsuarios() {
+  File file = LittleFS.open(ACCESS_LOG_FILE, "r");
+  if (!file) {
+    Serial.println("Erro ao abrir o arquivo");
+    return;
+  }
+
+  Serial.println("📄 Usuários cadastrados:");
+  while (file.available()) {
+    Serial.write(file.read());
   }
   file.close();
 }

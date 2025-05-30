@@ -1,16 +1,12 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <LittleFS.h>
-#include <WiFiClientSecure.h>
-#include <UniversalTelegramBot.h>
 #include <ArduinoJson.h>
+
 #include "distance_sensor.h"
 #include "littlefs_manager.h"
-
-// Pino do botão
-const int buttonPin = 23;
-// Pino para o LED controlado pelo Telegram
-const int telegramLedPin = 4;
+#include "rfid_reader.h"
+#include "telegram_manager.h"
 
 // Variáveis globais para controle de tempo do log de distância
 unsigned long lastDistanceLogTime = 0;
@@ -28,40 +24,26 @@ int lastButtonState = HIGH;
 unsigned long lastDebounceTime = 0;
 const unsigned long debounceDelay = 50;
 
-// ******* TELEGRAM *********
-// Token do bot do Telegram
-#define BOT_TOKEN "7713973375:AAEibzzuR0ATjuSjvzAme28onz8V-SqpNzE"
-#define CHAT_ID "5768620322"
-// Inicialização da conexão segura
-WiFiClientSecure client;
-UniversalTelegramBot bot(BOT_TOKEN, client);
-// ******* TELEGRAM *********
-
-
+void setupWifi();
 void saveLedState();
 void printLedStateFile();
-void loadWiFiCredentialsAndConnect();
-void handleNewMessages(int numNewMessages);
+void handleNewMessages();
 
 void setup() {
   Serial.begin(115200);
-  pinMode(telegramLedPin, OUTPUT); // Configura o pino do LED do Telegram como saída
-  pinMode(buttonPin, INPUT_PULLUP);
-
-  setupRgbLed();
-
   Serial.println("Inicializando Sistema Casa Inteligente...");
-
+  setupRgbLed();
+  setupWifi();
+  setupTelegramManager();
+  setupRFID();
   setupLittleFS();
-
-  loadWiFiCredentialsAndConnect();
-  printLedStateFile();
-
-  Serial.println("Inicialização concluída.");
+  Serial.println("Inicialização  concluída.");
 }
 
 void loop() {
+  readTagRFID();
   readDistanceAndControlRgbLed();
+  handleNewMessages();
 
   if (intervalHasPassed(lastDistanceLogTime, distanceLogInterval)) {
     lastDistanceLogTime = millis();
@@ -72,20 +54,12 @@ void loop() {
     }
   }
 
-  if (WiFi.status() == WL_CONNECTED) {
-    int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
-    while (numNewMessages) {
-      handleNewMessages(numNewMessages);
-      numNewMessages = bot.getUpdates(bot.last_message_received + 1);
-    }
-  }
-
   delay(1000);
 }
 
 // Conecta ao Wi-Fi com base no arquivo de credenciais
-void loadWiFiCredentialsAndConnect() {
-  Serial.println("Listando arquivos:");
+void setupWifi() {
+  Serial.println("Listando arquivo para acesso ao WIFI:");
   File root = LittleFS.open("/");
   while (File file = root.openNextFile()) {
     Serial.print(" - ");
@@ -115,18 +89,6 @@ void loadWiFiCredentialsAndConnect() {
   Serial.println("\nConectado ao Wi-Fi!");
 }
 
-// Registra o usuário no arquivo
-void saveLedState() {
-  File file = LittleFS.open("/users.txt", "a");  // "a" de append
-  if (!file) {
-    Serial.println("Erro ao abrir /users.txt para salvar estado");
-    return;
-  }
-
-  file.printf("Usuário: %d\n", ledState);  // Adiciona nova linha no log
-  file.close();
-}
-
 // Leitura conteúdo dos arquivos
 void printLedStateFile() {
   File file = LittleFS.open("/led_state.txt", "r");
@@ -140,37 +102,4 @@ void printLedStateFile() {
     Serial.write(file.read());
   }
   file.close();
-}
-
-// Função para tratar mensagens recebidas
-void handleNewMessages(int numNewMessages) {
-  Serial.print("Mensagens novas: ");
-  Serial.println(numNewMessages);
-
-  for (int i = 0; i < numNewMessages; i++) {
-    String text = bot.messages[i].text;
-    String chat_id = bot.messages[i].chat_id;
-    String from_name = bot.messages[i].from_name;
-
-    if (from_name == "")
-      from_name = "Desconhecido";
-
-    if (text == "/start") {
-      String welcome = "Olá, " + from_name + "!\n";
-      welcome += "Use os comandos abaixo para controlar o LED:\n";
-      welcome += "/ledon para ligar\n";
-      welcome += "/ledoff para desligar";
-      bot.sendMessage(chat_id, welcome, "");
-    }
-
-    if (text == "/ledon") {
-      digitalWrite(telegramLedPin, HIGH);
-      bot.sendMessage(chat_id, "LED LIGADO! 💡", "");
-    }
-
-    if (text == "/ledoff") {
-      digitalWrite(telegramLedPin, LOW);
-      bot.sendMessage(chat_id, "LED DESLIGADO! ❌", "");
-    }
-  }
 }
