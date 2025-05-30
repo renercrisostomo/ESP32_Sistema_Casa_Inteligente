@@ -21,8 +21,8 @@ extern float currentNivelAgua;
 extern bool  sensorReadSuccessfully;
 
 // Declarações de função
-void setupRgbLed(); // Nova função para configurar o LED RGB
-void readDistanceAndControlRgbLed(); // Renomeada
+void setupRgbLed();
+void readDistanceAndControlRgbLed();
 void logCurrentDistance();
 
 #endif // DISTANCE_SENSOR_H

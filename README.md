@@ -8,7 +8,7 @@
   - [ ] Acionar o relé para um usuário liberado
   - [ ] Simular alguma "carga" conectada ao relé (fechadura)
 - [ ] Todo o projeto deve enviar e receber comandos do **Telegram**
-- [ ] Salvar todo o estado do ambiente com **LittleFS**
-  - [ ] Logs de usuários autorizados e não autorizados
+- [x] Salvar todo o estado do ambiente com **LittleFS**
+  - [x] Logs de usuários autorizados e não autorizados
   - [x] Logs de medições de distância
 - [ ] Deve ser possível **cadastrar/remover usuários pelo Telegram**

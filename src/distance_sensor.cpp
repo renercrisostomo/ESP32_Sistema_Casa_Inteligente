@@ -1,5 +1,4 @@
 #include "distance_sensor.h"
-#include <LittleFS.h> // Necessário para File e LittleFS em logCurrentDistance
 
 // Definições dos canais PWM para o LED RGB
 const int redChannel = 0;     // Canal PWM para o LED vermelho
@@ -26,7 +25,7 @@ void setupRgbLed() {
   ledcAttachPin(redPin, redChannel);
   ledcAttachPin(greenPin, greenChannel);
   ledcAttachPin(bluePin, blueChannel);
-  Serial.println("LED RGB configurado.");
+  Serial.println("Setup LED RGB.");
 }
 
 // Função para ler a distância e controlar o LED RGB
@@ -79,31 +78,9 @@ void readDistanceAndControlRgbLed() {
   } else {
     Serial.println("Erro ao ler o sensor HC-SR04.");
     sensorReadSuccessfully = false;
-    // Em caso de erro, apagar o LED RGB (definir todas as cores como 0)
+    // Em caso de erro, apaga o LED
     ledcWrite(redChannel, 0);
     ledcWrite(greenChannel, 0);
     ledcWrite(blueChannel, 0);
   }
-}
-
-// Função para salvar o log de distância no LittleFS
-void logCurrentDistance() {
-  if (!sensorReadSuccessfully) { // Só faz o log se a última leitura foi válida
-    Serial.println("Leitura do sensor inválida, log não salvo.");
-    return;
-  }
-
-  File file = LittleFS.open("/distance_sensor_measurements.txt", "a");
-  if (!file) {
-    Serial.println("Falha ao abrir /distance_sensor_measurements.txt para log.");
-    return;
-  }
-  // Idealmente, adicionar um timestamp aqui se tiver RTC ou NTP
-  file.print("Distancia: ");
-  file.print(currentDistancia);
-  file.print(" cm, Nivel Agua: ");
-  file.print(currentNivelAgua);
-  file.println(" cm");
-  file.close();
-  Serial.println("Log de distância salvo em /distance_sensor_measurements.txt");
 }
