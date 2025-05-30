@@ -5,6 +5,7 @@
 #include <UniversalTelegramBot.h>
 #include <ArduinoJson.h>
 #include "distance_sensor.h"
+#include "littlefs_manager.h"
 
 // Pino do botão
 const int buttonPin = 23;
@@ -51,11 +52,7 @@ void setup() {
 
   Serial.println("Inicializando Sistema Casa Inteligente...");
 
-  Serial.println("Montando LittleFS...");
-  if (!LittleFS.begin()) {
-    Serial.println("Erro ao montar LittleFS");
-    return;
-  }
+  setupLittleFS();
 
   loadWiFiCredentialsAndConnect();
   printLedStateFile();
@@ -68,7 +65,11 @@ void loop() {
 
   if (intervalHasPassed(lastDistanceLogTime, distanceLogInterval)) {
     lastDistanceLogTime = millis();
-    logCurrentDistance();
+    if (sensorReadSuccessfully) {
+      logDistanceMeasurement(currentDistancia, currentNivelAgua);
+    } else {
+      Serial.println("Leitura do sensor invalida, log de distancia nao salvo.");
+    }
   }
 
   if (WiFi.status() == WL_CONNECTED) {
