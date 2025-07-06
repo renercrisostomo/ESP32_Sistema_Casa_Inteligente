@@ -1,5 +1,7 @@
 # ESP32_Sistema_Casa_Inteligente
 
+Projeto prático para simular uma casa inteligente usando ESP32 para a disciplina Microcontroladores do curso Ciências da Computação 7º semestre do IFCE Maracanaú.
+
 ## TODO - Projeto Prático: Sistema de Casa Inteligente (28 e 30/05) - Relatório 01/06
 
 - [x] Usar o sensor de distância para medir o nível de água da caixa d’água
