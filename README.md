@@ -7,10 +7,10 @@ Projeto prático para simular uma casa inteligente usando ESP32 para a disciplin
 - [x] Usar o sensor de distância para medir o nível de água da caixa d’água
 - [x] Usar o LED RGB para mudar a intensidade (cor) de acordo com o nível
 - [x] Criar um controle de acesso usando o **RFID RDM6300**
-  - [ ] Acionar o relé para um usuário liberado
-  - [ ] Simular alguma "carga" conectada ao relé (fechadura)
+  - [x] Acionar o relé para um usuário liberado
+  - [x] Simular alguma "carga" conectada ao relé (fechadura)
 - [x] Todo o projeto deve enviar e receber comandos do **Telegram**
 - [x] Salvar todo o estado do ambiente com **LittleFS**
   - [x] Logs de usuários autorizados e não autorizados
   - [x] Logs de medições de distância
-- [ ] Deve ser possível **cadastrar/remover usuários pelo Telegram**
+- [x] Deve ser possível **cadastrar/remover usuários pelo Telegram**
